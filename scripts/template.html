@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Segunda Vuelta – Portal Colaborador</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#05080f;--surface:#0d1220;--card:#121928;--border:#1c2a3f;--accent:#f59e0b;--accent2:#38bdf8;--green:#34d399;--red:#f87171;--text:#e2e8f0;--muted:#64748b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(245,158,11,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,0.04) 1px,transparent 1px);background-size:48px 48px;}
+  #login{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .login-wrap{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:52px 44px;width:420px;position:relative;box-shadow:0 0 80px rgba(245,158,11,0.07);}
+  .login-wrap::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px;}
+  .login-brand{text-align:center;margin-bottom:36px;}
+  .login-brand .badge{display:inline-block;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;letter-spacing:3px;padding:4px 14px;border-radius:4px;margin-bottom:14px;}
+  .login-brand h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1.1;}
+  .login-brand p{color:var(--muted);font-size:12px;margin-top:6px;}
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;}
+  .field input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:20px;outline:none;transition:border-color .2s;letter-spacing:6px;}
+  .field input:focus{border-color:var(--accent);}
+  .field input::placeholder{color:var(--muted);letter-spacing:1px;font-size:13px;}
+  .btn-login{width:100%;padding:15px;border:none;border-radius:10px;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .2s,transform .1s;}
+  .btn-login:hover{opacity:.9;}.btn-login:active{transform:scale(.98);}
+  .login-error{margin-top:14px;text-align:center;color:var(--red);font-size:12px;display:none;}
+  .login-hint{text-align:center;margin-top:16px;color:var(--muted);font-size:11px;line-height:1.6;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .shake{animation:shake .4s ease;}
+  #dashboard{display:none;position:relative;z-index:1;}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:16px;}
+  .topbar-badge{background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:10px;letter-spacing:2px;padding:4px 10px;border-radius:5px;}
+  .topbar-name{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;}
+  .topbar-rol{font-size:11px;color:var(--muted);}
+  .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;transition:all .2s;}
+  .btn-logout:hover{border-color:var(--red);color:var(--red);}
+  .corte-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .corte-bar label{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  .corte-bar select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-family:'DM Mono',monospace;font-size:13px;outline:none;cursor:pointer;}
+  .corte-badge{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:12px;}
+  .main{padding:28px 32px;max-width:1200px;}
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;}
+  .stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--acc,var(--accent));opacity:.6;}
+  .stat-card.blue{--acc:var(--accent2);}.stat-card.green{--acc:var(--green);}
+  .stat-label{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+  .stat-value{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1;}
+  .stat-value.amber{color:var(--accent);}.stat-value.blue{color:var(--accent2);}.stat-value.green{color:var(--green);}
+  .stat-sub{font-size:11px;color:var(--muted);margin-top:6px;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+  @media(max-width:768px){.two-col{grid-template-columns:1fr;}.main{padding:16px;}.topbar{padding:14px 16px;}.corte-bar{padding:10px 16px;}}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;}
+  .panel-sub{font-size:11px;color:var(--muted);}
+  .panel-body{padding:20px;}
+  .month-bars{display:flex;flex-direction:column;gap:10px;}
+  .month-bar-row{display:flex;align-items:center;gap:12px;}
+  .month-label{font-size:11px;color:var(--muted);width:70px;text-align:right;flex-shrink:0;}
+  .bar-track{flex:1;background:var(--border);border-radius:4px;height:22px;}
+  .bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),#fbbf24);transition:width .6s ease;display:flex;align-items:center;padding-left:8px;min-width:28px;}
+  .bar-num{font-size:11px;font-weight:500;color:#000;}
+  .hist-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .hist-table th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+  .hist-table td{padding:10px 10px;border-bottom:1px solid rgba(28,42,63,0.5);}
+  .hist-table tr:last-child td{border-bottom:none;}
+  .hist-table tr:hover td{background:rgba(245,158,11,0.04);}
+  .rol-badge{font-size:10px;padding:3px 8px;border-radius:4px;font-weight:500;}
+  .rol-badge.conductor{background:rgba(245,158,11,0.15);color:var(--accent);}
+  .rol-badge.aux{background:rgba(56,189,248,0.15);color:var(--accent2);}
+  .ot-num{color:var(--muted);font-size:11px;}
+  .corte-info{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:12px 16px;margin-bottom:24px;font-size:12px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap;}
+  .corte-info span b{color:var(--accent);}
+  .sin-data{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:20px;text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px;}
+  .sin-data b{color:var(--red);}
+  .empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+  .updated-badge{font-size:10px;color:var(--muted);margin-left:auto;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .animate{animation:fadeUp .4s ease forwards;}
+  .a1{animation-delay:.05s;opacity:0;}.a2{animation-delay:.1s;opacity:0;}.a3{animation-delay:.15s;opacity:0;}.a4{animation-delay:.2s;opacity:0;}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-wrap" id="loginBox">
+    <div class="login-brand">
+      <div class="badge">PORTAL COLABORADOR</div>
+      <h1>Segunda Vuelta</h1>
+      <p>Ingresa tu número de DNI para ver tus recorridos</p>
+    </div>
+    <div class="field">
+      <label>Número de DNI</label>
+      <input type="text" id="dniInput" placeholder="Ej: 43224137" maxlength="12" autocomplete="off" inputmode="numeric"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()">INGRESAR</button>
+    <div class="login-error" id="loginErr">DNI no encontrado. Verifica e intenta nuevamente.</div>
+    <div class="login-hint">Tu contraseña es tu número de DNI completo.<br>Consulta con tu supervisor si tienes problemas.</div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-badge">2V</div>
+      <div>
+        <div class="topbar-name" id="topName">—</div>
+        <div class="topbar-rol" id="topRol">—</div>
+      </div>
+    </div>
+    <span class="updated-badge" id="updatedBadge"></span>
+    <button class="btn-logout" onclick="logout()">← Cerrar sesión</button>
+  </div>
+  <div class="corte-bar">
+    <label>Corte:</label>
+    <select id="corteSelect" onchange="renderDash()"></select>
+    <span class="corte-badge" id="corteBadge">—</span>
+  </div>
+  <div class="main">
+    <div class="corte-info" id="corteInfo"></div>
+    <div id="sinDataMsg" class="sin-data" style="display:none"><b>Sin registros</b> en este corte. Consulta con tu supervisor si crees que es un error.</div>
+    <div class="stats-row">
+      <div class="stat-card animate a1"><div class="stat-label">Vueltas en el corte</div><div class="stat-value amber" id="statCorte">0</div><div class="stat-sub" id="statCorteDetalle">—</div></div>
+      <div class="stat-card blue animate a2"><div class="stat-label">Como Conductor</div><div class="stat-value blue" id="statCond">0</div><div class="stat-sub">en el corte actual</div></div>
+      <div class="stat-card green animate a3"><div class="stat-label">Como Auxiliar</div><div class="stat-value green" id="statAux">0</div><div class="stat-sub">en el corte actual</div></div>
+      <div class="stat-card animate a4"><div class="stat-label">Total histórico</div><div class="stat-value" id="statTotal">0</div><div class="stat-sub">todos los cortes</div></div>
+    </div>
+    <div class="two-col">
+      <div class="panel animate a2">
+        <div class="panel-head"><div class="panel-title">Vueltas por mes</div><div class="panel-sub">histórico completo</div></div>
+        <div class="panel-body"><div class="month-bars" id="monthBars"></div></div>
+      </div>
+      <div class="panel animate a3">
+        <div class="panel-head"><div class="panel-title">Detalle del corte</div><div class="panel-sub">recorridos registrados</div></div>
+        <div class="panel-body" style="padding:0;max-height:340px;overflow-y:auto;">
+          <table class="hist-table"><thead><tr><th>Fecha</th><th>OT</th><th>Rol</th></tr></thead><tbody id="histTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS  = __USERS__;
+const DATA   = __DATA__;
+const CORTES = __CORTES__;
+
+// Poblar selector de cortes
+const sel = document.getElementById('corteSelect');
+CORTES.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c.value;
+  opt.textContent = c.label;
+  if(c.selected) opt.selected = true;
+  sel.appendChild(opt);
+});
+
+let currentUser = null;
+
+function norm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+function getAll(n){ const nn=norm(n.trim()); return DATA.filter(r=>r.personas.some(p=>norm(p.nombre.trim())===nn)); }
+function getCorte(n,ini,fin){ const nn=norm(n.trim()); return DATA.filter(r=>{ const f=new Date(r.fecha); return f>=new Date(ini)&&f<=new Date(fin)&&r.personas.some(p=>norm(p.nombre.trim())===nn); }); }
+function getRol(n,r){ const nn=norm(n.trim()); const p=r.personas.find(x=>norm(x.nombre.trim())===nn); return p?p.rol:'—'; }
+function fmtDate(d){ return new Date(d+'T00:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+const dniInput=document.getElementById('dniInput');
+const loginErr=document.getElementById('loginErr');
+dniInput.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+dniInput.addEventListener('input',()=>{ loginErr.style.display='none'; });
+
+function doLogin(){
+  const dni=dniInput.value.trim();
+  if(!dni){ showErr('Ingresa tu número de DNI.'); return; }
+  const nombre=USERS[dni];
+  if(!nombre){ showErr('DNI no encontrado. Verifica e intenta nuevamente.'); shake(); return; }
+  currentUser=nombre;
+  document.getElementById('login').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  renderDash();
+}
+function showErr(m){ loginErr.textContent=m; loginErr.style.display='block'; }
+function shake(){ const b=document.getElementById('loginBox'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); }
+function logout(){ currentUser=null; dniInput.value=''; loginErr.style.display='none'; document.getElementById('login').style.display='flex'; document.getElementById('dashboard').style.display='none'; }
+
+function renderDash(){
+  if(!currentUser) return;
+  const [ini,fin]=document.getElementById('corteSelect').value.split('|');
+  const allR=getAll(currentUser);
+  const corteR=getCorte(currentUser,ini,fin);
+  const roles=new Set(allR.flatMap(r=>r.personas.filter(p=>norm(p.nombre.trim())===norm(currentUser)).map(p=>p.rol)));
+  const rolLabel=[...roles].map(r=>r==='CONDUCTOR'?'Conductor':r).join(' / ');
+  document.getElementById('topName').textContent=currentUser;
+  document.getElementById('topRol').textContent=rolLabel||'Colaborador';
+  document.getElementById('corteBadge').textContent=fmtDate(ini)+' → '+fmtDate(fin);
+  document.getElementById('corteInfo').innerHTML='<span>Corte: <b>'+fmtDate(ini)+' al '+fmtDate(fin)+'</b></span><span>Colaborador: <b>'+currentUser+'</b></span><span>Rol(es): <b>'+(rolLabel||'—')+'</b></span>';
+  const condN=corteR.filter(r=>getRol(currentUser,r)==='CONDUCTOR').length;
+  const auxN=corteR.filter(r=>getRol(currentUser,r)!=='CONDUCTOR').length;
+  document.getElementById('statCorte').textContent=corteR.length;
+  document.getElementById('statCorteDetalle').textContent=condN+' conductor · '+auxN+' auxiliar';
+  document.getElementById('statCond').textContent=condN;
+  document.getElementById('statAux').textContent=auxN;
+  document.getElementById('statTotal').textContent=allR.length;
+  document.getElementById('sinDataMsg').style.display=corteR.length===0?'block':'none';
+  const byMonth={};
+  allR.forEach(r=>{ const d=new Date(r.fecha+'T00:00:00'); const k=d.toLocaleDateString('es-PE',{month:'short',year:'numeric'}); byMonth[k]=(byMonth[k]||0)+1; });
+  const months=Object.entries(byMonth);
+  const maxV=Math.max(...months.map(m=>m[1]),1);
+  document.getElementById('monthBars').innerHTML=months.length?months.map(([m,v])=>'<div class="month-bar-row"><div class="month-label">'+m+'</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(v/maxV*100,8)+'%"><span class="bar-num">'+v+'</span></div></div></div>').join(''):'<div class="empty">Sin registros históricos</div>';
+  const sorted=[...corteR].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  document.getElementById('histTable').innerHTML=sorted.length?sorted.map(r=>{ const rol=getRol(currentUser,r); const rc=rol==='CONDUCTOR'?'conductor':'aux'; const rt=rol==='CONDUCTOR'?'Conductor':rol==='AUX1'?'Aux 1':rol==='AUX2'?'Aux 2':'Aux 3'; const ot=r.ot?'<span class="ot-num">OT '+r.ot+'</span>':'<span class="ot-num" style="color:#374151">—</span>'; return '<tr><td>'+fmtDate(r.fecha)+'</td><td>'+ot+'</td><td><span class="rol-badge '+rc+'">'+rt+'</span></td></tr>'; }).join(''):'<tr><td colspan="3" class="empty">Sin registros en este corte</td></tr>';
+}
+</script>
+</body>
+</html>
