@@ -336,17 +336,12 @@ function updateMascot(v){
 // Populate corte selectors — show only cortes where today >= 1st of month AFTER fin
 ['corteSelect','adminCorteSelect'].forEach(id=>{
   const s=document.getElementById(id);
-  const today=new Date(); today.setHours(0,0,0,0);
   CORTES.forEach(c=>{
-    const fin=new Date(c.value.split('|')[1]+'T00:00:00');
-    const payDate=new Date(fin.getFullYear(),fin.getMonth()+1,1);
-    if(today<payDate) return;
     const o=document.createElement('option');
     o.value=c.value; o.textContent=c.label;
     if(c.selected) o.selected=true;
     s.appendChild(o);
   });
-  if(s.options.length>0 && !s.value) s.selectedIndex=s.options.length-1;
 });
 
 let currentUser=null,currentDNI=null;
@@ -529,7 +524,21 @@ function renderBono(){
       +'</div>';
   }
 
-  if(!bono){container.innerHTML=noBono;return;}
+  // Warning for justified absence (PAGAR=SI but has faltas)
+  const ausWarning = (pagarBono && faltas>0) ? 
+    '<div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1.5px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;">'
+    +'<div style="font-size:24px;flex-shrink:0;">⚠️</div>'
+    +'<div><div style="font-weight:900;color:#b45309;font-size:14px;margin-bottom:4px;">IMPORTANTE: Tienes '+faltas+' falta'+(faltas>1?'s':'')+' registrada'+(faltas>1?'s':'')+' en este corte</div>'
+    +'<div style="font-size:13px;color:#78350f;line-height:1.6;">Tu bono se pagó esta vez porque justificaste a tiempo. '
+    +'Sin embargo, recuerda que <b>en lo sucesivo el bono está sujeto a asistencia perfecta</b>. '
+    +'¡Sigue así y cuida tu asistencia! 💪</div>'
+    +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;">'
+    +fechas.map(f=>'<span style="background:#fff;border:1px solid #f59e0b;color:#b45309;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;">📅 '+f+'</span>').join('')
+    +'</div></div></div>'
+    : '';
+
+  if(!bono){container.innerHTML=ausWarning+noBono;return;}
+  container.innerHTML=''; // reset, will build below
 
   if(bono.type==='prod'){
     const anulado=!pagarBono;
@@ -544,7 +553,7 @@ function renderBono(){
     const inds=IND.map(ind=>{const v=bono[ind.k]||0;const ok=v>0;return '<div class="ind-item '+(ok?'ok':'fail')+'"><div class="ind-icon">'+(ok?'✅':'❌')+'</div><div class="ind-name">'+ind.l+'</div><div class="ind-meta">Meta: '+ind.meta+'</div><div class="ind-amount '+(ok?'ok':'fail')+'">'+(ok?'S/. '+v:'No cumple')+'</div></div>';}).join('');
     const multiBox=bono.multicanal?'<div class="multi-box"><div>⭐ <b>Eres de canal MULTICANAL</b></div><div style="font-weight:900;color:var(--amber);">+ S/. 200</div></div>':'';
     const multiRes=bono.multicanal?'<div class="res-row"><span class="res-label">⭐ Bono Multicanal</span><span class="res-val amber">+ S/. 200</span></div>':'';
-    container.innerHTML='<div class="bono-card anim a1"><div class="bono-header" style="background:linear-gradient(135deg,#007a40,#009b52);"><div><div class="bono-htitle">Bono de Productividad · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+(bono.multicanal?' <span class="multi-star">★ MULTICANAL</span>':'')+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Indicadores del corte</div><div class="ind-grid">'+inds+'</div>'+multiBox+'<div class="resumen"><div class="res-row"><span class="res-label">Bono base (5 indicadores)</span><span class="res-val green">S/. '+bono.bono_base+'</span></div>'+multiRes+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
+    container.innerHTML=ausWarning+'<div class="bono-card anim a1"><div class="bono-header" style="background:linear-gradient(135deg,#007a40,#009b52);"><div><div class="bono-htitle">Bono de Productividad · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+(bono.multicanal?' <span class="multi-star">★ MULTICANAL</span>':'')+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Indicadores del corte</div><div class="ind-grid">'+inds+'</div>'+multiBox+'<div class="resumen"><div class="res-row"><span class="res-label">Bono base (5 indicadores)</span><span class="res-val green">S/. '+bono.bono_base+'</span></div>'+multiRes+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
 
   } else if(bono.type==='movi'){
     const sel=document.getElementById('corteSelect');
@@ -576,14 +585,14 @@ function renderBono(){
     if(bono.nocturno>0){items+='<div class="movi-item"><div class="movi-label">🌙 Bono Nocturno</div><div class="movi-val">S/. '+bono.nocturno+'</div></div>';resRows+='<div class="res-row"><span class="res-label">🌙 Bono Nocturno</span><span class="res-val green">S/. '+bono.nocturno+'</span></div>';}
     if(bono.productividad>0){items+='<div class="movi-item"><div class="movi-label">⚡ Bono Productividad</div><div class="movi-val">S/. '+bono.productividad+'</div></div>';resRows+='<div class="res-row"><span class="res-label">⚡ Bono Productividad</span><span class="res-val green">S/. '+bono.productividad+'</span></div>';}
     const cols=[bono.nocturno,bono.productividad].filter(v=>v>0).length||1;
-    container.innerHTML='<div class="bono-card anim a1"><div class="bono-header" style="background:'+getCanalColor(bono.canal)+';"><div><div class="bono-htitle">Bono · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div class="movi-grid" style="grid-template-columns:repeat('+cols+',1fr);">'+items+'</div><div class="resumen">'+resRows+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
+    container.innerHTML=ausWarning+'<div class="bono-card anim a1"><div class="bono-header" style="background:'+getCanalColor(bono.canal)+';"><div><div class="bono-htitle">Bono · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div class="movi-grid" style="grid-template-columns:repeat('+cols+',1fr);">'+items+'</div><div class="resumen">'+resRows+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
 
   } else if(bono.type==='aux'){
     const anulado=!pagarBono;
     if(anulado){container.innerHTML=mkAnulado(bono);return;}
     const color=getCanalColor(bono.canal);
     const multiBadge=bono.canal==='MULTICANAL'?' <span class="multi-star">★ MULTICANAL</span>':'';
-    container.innerHTML='<div class="bono-card anim a1"><div class="bono-header" style="background:'+color+';"><div><div class="bono-htitle">Bono de Canal · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+multiBadge+'</div></div><div class="bono-total-right"><div class="bono-total-label">Bono a recibir</div><div class="bono-total-amount">S/. '+bono.bono+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos+'</div></div></div><div class="bono-body"><div class="bono-desc">📋 Este es tu <b>Bono de Canal</b> correspondiente al mes de <b>Marzo 2026</b>, asignado según tu canal de trabajo.</div><div class="resumen"><div class="res-row"><span class="res-label">📦 Canal asignado</span><span style="font-weight:700;">'+bono.canal+'</span></div><div class="res-row"><span class="res-label">📅 Mes de programación</span><span style="font-weight:700;">Marzo 2026</span></div><div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.bono+'</span></div></div></div></div>';
+    container.innerHTML=ausWarning+'<div class="bono-card anim a1"><div class="bono-header" style="background:'+color+';"><div><div class="bono-htitle">Bono de Canal · Marzo 2026</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+multiBadge+'</div></div><div class="bono-total-right"><div class="bono-total-label">Bono a recibir</div><div class="bono-total-amount">S/. '+bono.bono+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos+'</div></div></div><div class="bono-body"><div class="bono-desc">📋 Este es tu <b>Bono de Canal</b> correspondiente al mes de <b>Marzo 2026</b>, asignado según tu canal de trabajo.</div><div class="resumen"><div class="res-row"><span class="res-label">📦 Canal asignado</span><span style="font-weight:700;">'+bono.canal+'</span></div><div class="res-row"><span class="res-label">📅 Mes de programación</span><span style="font-weight:700;">Marzo 2026</span></div><div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.bono+'</span></div></div></div></div>';
   }
 }
 
