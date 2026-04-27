@@ -795,49 +795,26 @@ function adminAgregarVuelta(){
 function renderOpinion(){
   const c=document.getElementById('contentO');
   c.innerHTML=`
-  <div class="frente-hdr-cv verde"><div class="frente-num-cv">📝</div><div><h3>Mi Opinión</h3><p>4 preguntas · Anónima · Solo 2 minutos</p></div></div>
-  <div class="bono-card" id="opForm">
-    <div class="anon-badge-cv"><span style="font-size:20px">🔒</span><p>Tu respuesta es <strong>100% anónima</strong>.<br>Gestión Humana no ve tu nombre ni tu DNI.</p></div>
-    <div class="preg-cv">
-      <div class="preg-label-cv"><span class="preg-num-cv">1</span><span>¿Qué tan motivado llegas a trabajar?</span></div>
-      <div class="escala-cv" id="cv_p1"><button class="esc-cv" onclick="cvEsc('cv_p1',1,this)">1</button><button class="esc-cv" onclick="cvEsc('cv_p1',2,this)">2</button><button class="esc-cv" onclick="cvEsc('cv_p1',3,this)">3</button><button class="esc-cv" onclick="cvEsc('cv_p1',4,this)">4</button><button class="esc-cv" onclick="cvEsc('cv_p1',5,this)">5</button></div>
-      <div class="esc-labels-cv"><span>Nada motivado</span><span>Muy motivado</span></div>
-    </div>
-    <div class="divider-cv"></div>
-    <div class="preg-cv">
-      <div class="preg-label-cv"><span class="preg-num-cv">2</span><span>¿Cómo te gustaría ser reconocido cuando haces bien tu trabajo?</span></div>
-      <textarea class="resp-cv" id="cv_p2" rows="3" placeholder="Ej: un elogio del jefe, un incentivo, reconocimiento ante mis compañeros..."></textarea>
-      <div class="resp-hint-cv">Tu respuesta nos ayuda a mejorar.</div>
-    </div>
-    <div class="divider-cv"></div>
-    <div class="preg-cv">
-      <div class="preg-label-cv"><span class="preg-num-cv">3</span><span>¿Hay algo que a veces dificulta tu llegada al trabajo?</span></div>
-      <div class="radio-cv" id="cv_p3r"><div class="ropt-cv" onclick="cvRadio('cv_p3r','si',this,'cv_p3si','cv_p3av')">Sí</div><div class="ropt-cv" onclick="cvRadio('cv_p3r','no',this,'cv_p3si','cv_p3av')">No</div></div>
-      <div id="cv_p3si" style="display:none">
-        <div class="sub-label-cv">¿Por qué?</div>
-        <textarea class="resp-cv" rows="2" placeholder="Cuéntanos qué dificulta tu llegada..."></textarea>
-        <div class="sub-label-cv">¿Cómo podríamos ayudarte?</div>
-        <textarea class="resp-cv" rows="2" placeholder="¿Hay algo que La Calera pudiera hacer?"></textarea>
-        <div class="resp-hint-cv">Ambos campos son opcionales.</div>
-      </div>
-    </div>
-    <div class="divider-cv"></div>
-    <div class="preg-cv">
-      <div class="preg-label-cv"><span class="preg-num-cv">4</span><span>¿Cuándo tienes un problema en el trabajo, sabes a quién acudir?</span></div>
-      <div class="radio-cv" id="cv_p4r"><div class="ropt-cv" onclick="cvRadio('cv_p4r','si',this,'cv_p4si','cv_p4av')">Sí</div><div class="ropt-cv" onclick="cvRadio('cv_p4r','no',this,'cv_p4si','cv_p4av')">No</div><div class="ropt-cv" onclick="cvRadio('cv_p4r','av',this,'cv_p4si','cv_p4av')">A veces</div></div>
-      <div id="cv_p4si" style="display:none">
-        <div class="sub-label-cv">¿A quién acudes?</div>
-        <textarea class="resp-cv" rows="2" placeholder="Ej: mi jefe directo, Gestión Humana..."></textarea>
-      </div>
-      <div id="cv_p4av" style="display:none">
-        <div class="sub-label-cv">¿Por qué a veces no sabes?</div>
-        <textarea class="resp-cv" rows="2" placeholder="Cuéntanos qué te genera esa duda..."></textarea>
-      </div>
-    </div>
-    <button class="btn" onclick="cvEnviarOpinion()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;">🔒 Enviar mi opinión (anónima)</button>
+  <div class="frente-hdr-cv verde">
+    <div class="frente-num-cv">📝</div>
+    <div><h3 style="margin:0">Mi Opinión</h3><p>Anónima · Solo 2 minutos</p></div>
   </div>
-  <div class="bono-card" id="opOk" style="display:none">
-    <div class="success-cv"><span class="ico">🙏</span><h3>¡Gracias por tu opinión!</h3><p>Tu respuesta fue enviada de forma anónima.<br><br>Gestión Humana la revisará y tomará acción.</p></div>
+  <div class="bono-card" style="padding:0;overflow:hidden;border-radius:16px">
+    <div style="background:#E8F5E9;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #C8E6C9">
+      <span style="font-size:18px">🔒</span>
+      <span style="font-size:12px;color:#1B5E20;font-weight:600">Tu respuesta es 100% anónima — Gestión Humana no ve tu nombre ni DNI</span>
+    </div>
+    <iframe
+      src="https://forms.office.com/r/XN9hBYJSMv?embed=1"
+      width="100%"
+      height="620"
+      frameborder="0"
+      marginwidth="0"
+      marginheight="0"
+      style="border:none;display:block"
+      allow="camera; microphone; geolocation"
+      allowfullscreen>
+    </iframe>
   </div>`;
 }
 
@@ -862,19 +839,26 @@ function cvEnviarOpinion(){
 function renderReportar(){
   const c=document.getElementById('contentR');
   c.innerHTML=`
-  <div class="frente-hdr-cv azul"><div class="frente-num-cv">📣</div><div><h3>Reportar / Sugerir</h3><p>Tu voz llega directo a Gestión Humana</p></div></div>
-  <div class="bono-card" id="rpForm">
-    <div class="anon-badge-cv"><span style="font-size:20px">🔒</span><p>Puedes reportar <strong>anónimo o con tu nombre</strong>.<br>Tu reporte llega directo a Gestión Humana.</p></div>
-    <div class="sub-label-cv" style="font-size:13px;color:#0D3B1E;margin-bottom:10px">¿Qué quieres reportar?</div>
-    <div class="tipo-grid-cv"><div class="tipo-btn-cv sel" onclick="cvTipo(this)"><div class="ico">😤</div><div class="lbl">Queja</div></div><div class="tipo-btn-cv" onclick="cvTipo(this)"><div class="ico">💡</div><div class="lbl">Sugerencia</div></div><div class="tipo-btn-cv" onclick="cvTipo(this)"><div class="ico">⚠️</div><div class="lbl">Problema operativo</div></div><div class="tipo-btn-cv" onclick="cvTipo(this)"><div class="ico">🙋</div><div class="lbl">Consulta RRHH</div></div></div>
-    <div class="sub-label-cv" style="font-size:13px;color:#0D3B1E;margin-bottom:10px">¿Cómo quieres enviarlo?</div>
-    <div class="radio-cv" id="cv_anonRow"><div class="ropt-cv si" onclick="cvAnonimo(this)">🔒 Anónimo</div><div class="ropt-cv" onclick="cvAnonimo(this)">👤 Con mi nombre</div></div>
-    <div class="sub-label-cv" style="font-size:13px;color:#0D3B1E;margin:10px 0 8px">Cuéntanos qué pasó</div>
-    <textarea class="resp-cv" rows="5" placeholder="Describe el problema o sugerencia con el mayor detalle posible..."></textarea>
-    <button class="btn" onclick="cvEnviarReporte()" style="width:100%;background:#1565C0;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:900;cursor:pointer;margin-top:14px;">📤 Enviar reporte</button>
+  <div class="frente-hdr-cv azul">
+    <div class="frente-num-cv">📣</div>
+    <div><h3 style="margin:0">Reportar / Sugerir</h3><p>Tu voz llega directo a Gestión Humana</p></div>
   </div>
-  <div class="bono-card" id="rpOk" style="display:none">
-    <div class="success-cv"><span class="ico">✅</span><h3>¡Reporte enviado!</h3><p>Tu reporte llegó a Gestión Humana.<br><br>Lo revisaremos y tomaremos acción.<br>Gracias por ayudarnos a mejorar.</p><div class="code-cv"># CV-${new Date().getFullYear()}-${String(Math.floor(Math.random()*900)+100)}</div></div>
+  <div class="bono-card" style="padding:0;overflow:hidden;border-radius:16px">
+    <div style="background:#E3F2FD;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #90CAF9">
+      <span style="font-size:18px">🔒</span>
+      <span style="font-size:12px;color:#1565C0;font-weight:600">Puedes reportar anónimo o con tu nombre — tú decides. Tu reporte llega directo a Gestión Humana.</span>
+    </div>
+    <iframe
+      src="https://forms.office.com/r/XN9hBYJSMv?embed=1"
+      width="100%"
+      height="620"
+      frameborder="0"
+      marginwidth="0"
+      marginheight="0"
+      style="border:none;display:block"
+      allow="camera; microphone; geolocation"
+      allowfullscreen>
+    </iframe>
   </div>`;
 }
 
