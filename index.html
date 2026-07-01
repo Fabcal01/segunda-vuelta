@@ -514,7 +514,7 @@ function renderDash(){
   const pagarBono=aus.pagar!=='NO';
   const bonoAnulado=!pagarBono&&bono&&(bono.type==='prod'||bono.type==='aux');
   const bonoVal=bonoAnulado?0:(bono?(bono.type==='aux'?bono.bono:(bono.type==='movi'?0:bono.total)):0);
-  const bonoMulti=bono&&bono.multicanal?280:0;
+  const bonoMulti=(bono&&bono.multicanal&&!bonoAnulado)?280:0;
   const totalGeneral=ganancia+bonoVal+bonoMulti+_trasladoDe(currentDNI);
   if(bonoVal>0||bonoMulti>0){
     document.getElementById('rowVueltas').style.display='flex';
@@ -581,11 +581,17 @@ function renderBono(){
     const chips=fechas.map(f=>'<span class="falta-chip">📅 '+f+'</span>').join('');
     let preview='';
     if(bonoData&&bonoData.type==='prod'){
-      const multiRow=bonoData.multicanal?'<div class="hubiera-row"><span>⭐ Bono Multicanal (no anulado)</span><span style="color:var(--amber);font-weight:900;">S/. 280 ✅</span></div>':'';
-      preview='<div class="bono-hubiera"><div class="bono-hubiera-title">Lo que hubieras cobrado con asistencia perfecta:</div>'
-        +'<div class="hubiera-row"><span>Bono base (5 indicadores)</span><span class="tachado">S/. '+bonoData.bono_base+'</span></div>'
-        +multiRow
-        +'<div class="hubiera-row"><span>Total bono anulado</span><span class="tachado">S/. '+bonoData.bono_base+'</span></div></div>';
+      if(bonoData.multicanal){
+        var _indA=(bonoData.entrega||0)+(bonoData.smart||0)+(bonoData.caida||0)+(bonoData.lavado||0)+(bonoData.recojo||0);
+        preview='<div class="bono-hubiera"><div class="bono-hubiera-title">Lo que hubieras cobrado con asistencia perfecta:</div>'
+          +'<div class="hubiera-row"><span>Bono base (5 indicadores)</span><span class="tachado">S/. '+_indA+'</span></div>'
+          +'<div class="hubiera-row"><span>⭐ Bono Multicanal (anulado)</span><span class="tachado">S/. 280</span></div>'
+          +'<div class="hubiera-row"><span>Total bono anulado</span><span class="tachado">S/. '+(_indA+280)+'</span></div></div>';
+      } else {
+        preview='<div class="bono-hubiera"><div class="bono-hubiera-title">Lo que hubieras cobrado con asistencia perfecta:</div>'
+          +'<div class="hubiera-row"><span>Bono base (5 indicadores)</span><span class="tachado">S/. '+bonoData.bono_base+'</span></div>'
+          +'<div class="hubiera-row"><span>Total bono anulado</span><span class="tachado">S/. '+bonoData.bono_base+'</span></div></div>';
+      }
     } else if(bonoData&&bonoData.type==='aux'){
       preview='<div class="bono-hubiera"><div class="bono-hubiera-title">Lo que hubieras cobrado con asistencia perfecta:</div>'
         +'<div class="hubiera-row"><span>Bono de Canal — '+bonoData.canal+'</span><span class="tachado">S/. '+bonoData.bono+'</span></div>'
