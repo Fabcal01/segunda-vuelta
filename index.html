@@ -714,12 +714,11 @@ function renderDash(){
     document.getElementById('totalLabel').textContent='💰 Ganancia estimada este corte';
     document.getElementById('totalVal').textContent='S/. '+ganancia;
   } else {
-    document.getElementById('rowVueltas').style.display='none';
+    var _trX=_trasladoDe(currentDNI);
     document.getElementById('rowBono').style.display='none';
-    var _rt=document.getElementById('rowTraslado');if(_rt)_rt.style.display='none';
-    document.getElementById('motiDiv').style.display='none';
-    document.getElementById('totalLabel').textContent='💰 Ganancia estimada este corte';
-    document.getElementById('totalVal').textContent='S/. '+ganancia;
+    var _rt=document.getElementById('rowTraslado');
+    if(_trX>0){document.getElementById('rowVueltas').style.display='flex';document.getElementById('valVueltas').textContent='S/. '+ganancia;if(_rt){_rt.style.display='flex';document.getElementById('valTraslado').textContent='S/. '+_trX;}document.getElementById('motiDiv').style.display='block';document.getElementById('totalLabel').textContent='💰 Total estimado este corte';document.getElementById('totalVal').textContent='S/. '+(ganancia+_trX);}
+    else{document.getElementById('rowVueltas').style.display='none';if(_rt)_rt.style.display='none';document.getElementById('motiDiv').style.display='none';document.getElementById('totalLabel').textContent='💰 Ganancia estimada este corte';document.getElementById('totalVal').textContent='S/. '+ganancia;}
   }
   // Comparativo
   const idx=CORTES.findIndex(c=>c.value===sel.value);
@@ -830,7 +829,7 @@ function renderBono(){
     const inds=IND.map(ind=>{const v=bono[ind.k]||0;const ok=v>0;return '<div class="ind-item '+(ok?'ok':'fail')+'"><div class="ind-icon">'+(ok?'✅':'❌')+'</div><div class="ind-name">'+ind.l+'</div><div class="ind-meta">Meta: '+ind.meta+'</div><div class="ind-amount '+(ok?'ok':'fail')+'">'+(ok?'S/. '+v:'No cumple')+'</div></div>';}).join('');
     const multiBox=bono.multicanal?'<div class="multi-box"><div>⭐ <b>Eres de canal MULTICANAL</b></div><div style="font-weight:900;color:var(--amber);">+ S/. 200</div></div>':'';
     const multiRes=bono.multicanal?'<div class="res-row"><span class="res-label">⭐ Bono Multicanal</span><span class="res-val amber">+ S/. 200</span></div>':'';
-    container.innerHTML=ausWarning+'<div class="bono-card anim a1"><div class="bono-header" style="background:linear-gradient(135deg,#007a40,#009b52);"><div><div class="bono-htitle">Bono de Productividad · '+_corteLbl()+'</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+(bono.multicanal?' <span class="multi-star">★ MULTICANAL</span>':'')+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Indicadores del corte</div><div class="ind-grid">'+inds+'</div>'+multiBox+'<div class="resumen"><div class="res-row"><span class="res-label">Bono base (5 indicadores)</span><span class="res-val green">S/. '+bono.bono_base+'</span></div>'+multiRes+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
+    container.innerHTML=ausWarning+'<div class="bono-card anim a1"><div class="bono-header" style="background:linear-gradient(135deg,#007a40,#009b52);"><div><div class="bono-htitle">Bono de Productividad · '+_corteLbl()+'</div><div class="bono-nombre">'+currentUser+'</div><div class="canal-badge">📦 '+bono.canal+(bono.multicanal?' <span class="multi-star">★ MULTICANAL</span>':'')+'</div></div><div class="bono-total-right"><div class="bono-total-label">Total bono</div><div class="bono-total-amount">S/. '+bono.total+'</div><div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;">'+bono.pos.replace('DE TRANSPORTE','')+'</div></div></div><div class="bono-body"><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Indicadores del corte</div><div class="ind-grid">'+inds+'</div>'+multiBox+'<div class="resumen"><div class="res-row"><span class="res-label">Bono base (5 indicadores)</span><span class="res-val green">S/. '+((bono.entrega||0)+(bono.smart||0)+(bono.caida||0)+(bono.lavado||0)+(bono.recojo||0))+'</span></div>'+multiRes+'<div class="res-row total"><span>Total bono a recibir</span><span class="res-val green" style="font-size:18px;">S/. '+bono.total+'</span></div></div></div></div>';
 
   } else if(bono.type==='movi'){
     const sel=document.getElementById('corteSelect');
