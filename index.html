@@ -297,6 +297,42 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
         </div>
       </div>
     </div>
+    <div id="cvCard" class="cv-card" style="display:none">
+      <div class="cv-title">🧾 ¿Está todo correcto en este corte?</div>
+      <div class="cv-sub" id="cvSub">Revisa tus vueltas, traslados y bono. Si falta algo, repórtalo aquí: es el único canal oficial.</div>
+      <div class="cv-btns"><button class="cv-ok" id="cvOkBtn" onclick="cvConforme()">✅ Todo conforme</button><button class="cv-rep" onclick="cvOpen()">⚠️ Reportar un faltante</button></div>
+      <div id="cvMine"></div>
+    </div>
+    <div id="cvModal" class="cv-modal" style="display:none" onclick="if(event.target===this)cvClose()">
+      <div class="cv-box">
+        <div class="cv-mt">⚠️ Reportar un faltante</div>
+        <label>¿Qué te falta?</label>
+        <select id="cvTipo" onchange="cvTipoChg()"><option value="">Elige una opción</option><option>Vuelta faltante</option><option>Traslado faltante</option><option>Bono incorrecto o faltante</option><option>Otro</option></select>
+        <div id="cvVF"><label>Fecha</label><input type="date" id="cvFecha">
+        <label>N° de OT <span style="font-weight:400">(si la tienes)</span></label><input id="cvOT" inputmode="numeric" maxlength="7" placeholder="Ej: 391375">
+        <label>¿Fuiste conductor o auxiliar?</label><select id="cvRol"><option>Conductor</option><option>Auxiliar</option></select></div>
+        <label>Detalle</label><textarea id="cvDet" rows="3" maxlength="400" placeholder="Ej: hice la ruta a Tiendas Mass con el chofer Juan Pérez, placa ABC-123"></textarea>
+        <div id="cvWarn" class="cv-warn" style="display:none"></div>
+        <div id="cvErr" class="cv-err" style="display:none"></div>
+        <div class="cv-btns" style="margin-top:12px"><button class="cv-cancel" onclick="cvClose()">Cancelar</button><button class="cv-ok" id="cvSend" onclick="cvSend()">Enviar reporte</button></div>
+      </div>
+    </div>
+    <style>
+    .cv-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:14px 16px;margin:0 0 16px}
+    .cv-title{font-weight:900;font-size:15px;color:var(--text)}.cv-sub{font-size:12.5px;color:var(--muted);margin:4px 0 10px;line-height:1.5}
+    .cv-btns{display:flex;gap:8px;flex-wrap:wrap}.cv-btns button{flex:1;min-width:130px;padding:11px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;border:none}
+    .cv-ok{background:linear-gradient(135deg,var(--gd),var(--green));color:#fff}.cv-ok:disabled{opacity:.6}.cv-rep{background:#fff8e1;color:#b45309;border:1.5px solid var(--amber)!important}
+    .cv-cancel{background:#fff;color:var(--text);border:1.5px solid var(--border)!important}
+    .cv-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:flex-end;justify-content:center;padding:0}
+    .cv-box{background:#fff;width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:18px 16px 22px;max-height:92vh;overflow:auto}
+    .cv-box label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:10px 0 4px}
+    .cv-box select,.cv-box input,.cv-box textarea{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box}
+    .cv-mt{font-weight:900;font-size:16px;color:#b45309}
+    .cv-warn{background:#fff8e1;border:1px solid var(--amber);color:#92400e;border-radius:10px;padding:8px 10px;font-size:12px;margin-top:10px}
+    .cv-err{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;border-radius:10px;padding:8px 10px;font-size:12px;margin-top:10px}
+    .cv-item{border-top:1px dashed var(--border);padding:8px 0;font-size:12.5px;display:flex;justify-content:space-between;gap:8px}
+    .cv-est{font-weight:800;font-size:11px;padding:2px 8px;border-radius:8px;white-space:nowrap;height:fit-content}
+    </style>
     <div class="tab-content active" id="contentV">
       <div id="alertNoData" class="alert-nodata"><div style="font-size:24px;">⚠️</div><div><b>Sin registros en este corte</b><p>Si crees que hay un error, contáctate con tu supervisor.</p></div></div>
       <div id="compBanner" class="comp-banner"><div class="comp-icon" id="compIcon">📊</div><div class="comp-text"><b id="compTitle">—</b><span id="compSub">—</span></div><div class="comp-badge" id="compBadge">—</div></div>
@@ -487,6 +523,72 @@ function exDoneClick(){
   },2200);
 }
 function exBack(){document.getElementById('excuelaGate').style.display='none';document.getElementById('login').style.display='flex';dniInput.value='';}
+
+/* ===== Validación del corte (reportes de faltantes) ===== */
+const CV_API = '';   // URL /exec del Apps Script. Vacío = módulo oculto.
+var _cvData=null;
+function _cvCorte(){var s=document.getElementById('corteSelect');return s&&s.value?s.value:(CORTES.find(function(c){return c.selected;})||{}).value;}
+function _cvIsActive(){var c=CORTES.find(function(x){return x.selected;});return c&&_cvCorte()===c.value;}
+function cvRender(){
+  var card=document.getElementById('cvCard'); if(!card) return;
+  if(!CV_API||!currentDNI||currentTab==='o'||currentTab==='r'||!_cvIsActive()){card.style.display='none';return;}
+  card.style.display='block'; cvLoad();
+}
+function cvLoad(){
+  var dni=currentDNI, corte=_cvCorte();
+  fetch(CV_API+'?dni='+encodeURIComponent(dni)+'&corte='+encodeURIComponent(corte)).then(function(r){return r.json();}).then(function(j){
+    if(dni!==currentDNI) return; _cvData=j||{}; cvPaint();
+  }).catch(function(){});
+}
+function cvPaint(){
+  var j=_cvData||{}, b=document.getElementById('cvOkBtn'), mine=document.getElementById('cvMine');
+  if(j.conforme){b.disabled=true;b.textContent='✅ Conforme ('+j.conforme+')';} else {b.disabled=false;b.textContent='✅ Todo conforme';}
+  var col={'Pendiente':'#fef3c7;color:#92400e','En revisión':'#e0f2fe;color:#075985','Aprobado':'#dcfce7;color:#166534','Rechazado':'#fee2e2;color:#991b1b'};
+  var L=j.reportes||[];
+  mine.innerHTML=L.length?'<div style="font-weight:800;font-size:12px;color:var(--muted);margin-top:12px">Mis reportes de este corte</div>'+L.map(function(r){
+    return '<div class="cv-item"><div><b>'+r.tipo+'</b>'+(r.fecha?' · '+r.fecha:'')+(r.ot?' · OT '+r.ot:'')+'<br><span style="color:var(--muted)">'+(r.respuesta?'GH: '+r.respuesta:r.detalle||'')+'</span></div><span class="cv-est" style="background:'+(col[r.estado]||col['Pendiente'])+'">'+(r.estado||'Pendiente')+'</span></div>';
+  }).join(''):'';
+}
+function _cvPost(o){return fetch(CV_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json();});}
+function _cvBase(){var u=USERS[currentDNI]||{};return {dni:currentDNI,nombre:u.nombre||'',puesto:u.pos||'',corte:_cvCorte()};}
+function cvConforme(){
+  var b=document.getElementById('cvOkBtn'); b.disabled=true; b.textContent='Enviando...';
+  var o=_cvBase(); o.tipo='CONFORME';
+  _cvPost(o).then(function(j){ if(j&&j.ok){ _cvData=_cvData||{}; _cvData.conforme=j.fecha||'hoy'; cvPaint(); } else { b.disabled=false; b.textContent='✅ Todo conforme'; alertCv(j&&j.error); } }).catch(function(){b.disabled=false;b.textContent='✅ Todo conforme';alertCv();});
+}
+function alertCv(m){var s=document.getElementById('cvSub');s.innerHTML='<span style="color:#991b1b;font-weight:700">'+(m||'No se pudo enviar. Revisa tu conexión e intenta de nuevo.')+'</span>';}
+function cvOpen(){
+  ['cvTipo','cvFecha','cvOT','cvDet'].forEach(function(id){document.getElementById(id).value='';});
+  var rg=_cvCorte().split('|'); var f=document.getElementById('cvFecha'); f.min=rg[0]; f.max=rg[1];
+  document.getElementById('cvWarn').style.display='none'; document.getElementById('cvErr').style.display='none';
+  var s=document.getElementById('cvSend'); s.disabled=false; s.textContent='Enviar reporte';
+  cvTipoChg(); document.getElementById('cvModal').style.display='flex';
+}
+function cvClose(){document.getElementById('cvModal').style.display='none';}
+function cvTipoChg(){var t=document.getElementById('cvTipo').value;document.getElementById('cvVF').style.display=(t==='Vuelta faltante'||t==='Traslado faltante')?'block':'none';document.getElementById('cvRol').parentElement;document.getElementById('cvRol').style.display=t==='Vuelta faltante'?'block':'none';document.getElementById('cvRol').previousElementSibling.style.display=t==='Vuelta faltante'?'block':'none';}
+function _cvOtFlags(ot){
+  if(!ot) return '';
+  var me=norm(currentUser.trim()), f=[];
+  var regs=DATA.filter(function(r){return String(r.ot)===String(ot);});
+  if(regs.some(function(r){return r.personas.some(function(p){return norm(p.nombre.trim())===me;});})) f.push('OT ya registrada a su nombre');
+  else if(regs.length) f.push('OT existe en registro con otras personas');
+  var L=(_cvData&&_cvData.reportes)||[]; if(L.some(function(r){return String(r.ot)===String(ot);})) f.push('OT ya reportada por él antes');
+  return f.join(' · ');
+}
+function cvSend(){
+  var t=document.getElementById('cvTipo').value, fe=document.getElementById('cvFecha').value, ot=document.getElementById('cvOT').value.replace(/\D/g,''), det=document.getElementById('cvDet').value.trim();
+  var err=document.getElementById('cvErr'); err.style.display='none';
+  var needF=(t==='Vuelta faltante'||t==='Traslado faltante');
+  if(!t){err.textContent='Elige qué te falta.';err.style.display='block';return;}
+  if(needF&&!fe){err.textContent='Indica la fecha.';err.style.display='block';return;}
+  if(!needF&&det.length<5){err.textContent='Cuéntanos el detalle.';err.style.display='block';return;}
+  var o=_cvBase(); o.tipo=t; o.fecha=needF?fe:''; o.ot=needF?ot:''; o.rol=t==='Vuelta faltante'?document.getElementById('cvRol').value:''; o.detalle=det; o.flag=needF?_cvOtFlags(ot):'';
+  var s=document.getElementById('cvSend'); s.disabled=true; s.textContent='Enviando...';
+  _cvPost(o).then(function(j){
+    if(j&&j.ok){ cvClose(); var sb=document.getElementById('cvSub'); sb.innerHTML='✅ <b>Reporte enviado.</b> Gestión Humana lo validará con tu supervisor. Aquí verás su estado.'; cvLoad(); }
+    else { err.textContent=(j&&j.error)||'No se pudo enviar.'; err.style.display='block'; s.disabled=false; s.textContent='Enviar reporte'; }
+  }).catch(function(){err.textContent='No se pudo enviar. Revisa tu conexión.';err.style.display='block';s.disabled=false;s.textContent='Enviar reporte';});
+}
 let currentUser=null,currentDNI=null;
 function norm(s){return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");}
 function getAll(n){const nn=norm(n.trim());return DATA.filter(r=>r.personas.some(p=>norm(p.nombre.trim())===nn));}
@@ -506,6 +608,7 @@ function switchTab(t){
     document.getElementById('content'+id.toUpperCase()).className='tab-content'+(t===id?' active':'');
   });
   document.getElementById('cbar').style.display=t==='v'?'flex':'none';
+  setTimeout(cvRender,0);
   if(t==='v') renderDash();
   else if(t==='b') renderBono();
   else if(t==='o') renderOpinion();
@@ -630,6 +733,7 @@ function renderDash(){
     else if(diff<0){document.getElementById('compIcon').textContent='📉';document.getElementById('compTitle').textContent='Menos vueltas que el corte anterior';document.getElementById('compSub').textContent='Hiciste '+total+' vueltas vs '+prevR.length+' del anterior · S/. '+(diff*tarifa);document.getElementById('compBadge').className='comp-badge comp-down';document.getElementById('compBadge').textContent=diff+' vueltas';}
     else{document.getElementById('compIcon').textContent='➡️';document.getElementById('compTitle').textContent='Igual que el corte anterior';document.getElementById('compSub').textContent='Hiciste '+total+' vueltas en ambos cortes';document.getElementById('compBadge').className='comp-badge comp-equal';document.getElementById('compBadge').textContent='Sin cambio';}
   } else {cb.style.display='none';}
+  setTimeout(cvRender,0);
   // Table
   const sorted=[...corteR].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
   document.getElementById('histTable').innerHTML=sorted.length?sorted.map(r=>{
