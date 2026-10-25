@@ -349,14 +349,9 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
         </div>
       </div>
     </div>
-    <div class="tab-content" id="contentB"><div id="bonoContent"></div><div id="medalBox"></div><style>.md-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:14px 16px;margin:16px 0}
-.md-top{background:linear-gradient(135deg,#fff7d6,#ffe9a8);border:1.5px solid #f5c542;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px;color:#7a5600;display:flex;flex-direction:column;gap:2px}.md-top span{font-size:11.5px;opacity:.85}
-.md-h{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--text)}.md-s{font-size:11.5px;color:var(--muted);font-weight:400}
-.md-n{font-size:26px;font-weight:900;color:#b7791f}.md-n small{font-size:13px;color:var(--muted)}
-.md-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin-top:10px}
-.md-it{text-align:center;padding:8px 2px;border-radius:12px;background:#f1f5f9;filter:grayscale(1);opacity:.55}.md-it.ok{background:#fff7d6;filter:none;opacity:1;border:1px solid #f5c542}
-.md-c{font-size:24px}.md-m{font-size:11px;font-weight:800;color:#475569}
-.md-r{margin-top:10px;background:#fff1e6;color:#9a3412;border-radius:10px;padding:8px 10px;font-size:12.5px}</style>
+    <div class="tab-content" id="contentB"><div id="bonoContent"></div><div id="medalBox"></div><style>.md-card{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:#fffdf4;border:1px solid #f3e2a6;border-radius:12px;padding:8px 12px;margin:12px 0;font-size:12.5px;color:#7a5600}
+.md-r{background:#fff1e6;color:#9a3412;border-radius:8px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:4px}
+.md-ds{display:flex;gap:3px}.md-d{width:16px;height:16px;border-radius:50%;background:#e5e7eb;color:#9ca3af;font-size:8.5px;font-weight:900;display:inline-flex;align-items:center;justify-content:center}.md-d.ok{background:#f5c542;color:#7a5600}</style>
     <div id="cvCard" class="cv-card" style="display:none">
       <div class="cv-title">🧾 ¿Estás de acuerdo con tus vueltas y bono de este corte?</div>
       <div class="cv-sub" id="cvSub">Si todo está bien, confírmalo. Si falta algo, repórtalo aquí: es el canal oficial.</div>
@@ -612,17 +607,12 @@ var _MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic
 function medalHTML(dni){
   var p=(MEDALLAS.p||{})[dni]; if(!p) return '';
   var cs=MEDALLAS.cortes.filter(function(c){return c[0] in p;}); if(!cs.length) return '';
-  var won=cs.filter(function(c){return p[c[0]]===1;}).length;
   var cur=(CORTES.find(function(x){return x.selected;})||{}).value, curOK=p[cur]===1;
   var racha=0; for(var i=cs.length-1;i>=0;i--){ if(p[cs[i][0]]===1) racha++; else break; }
-  var items=cs.map(function(c){var m=_MES[Number(c[0].slice(16,18))-1]; var ok=p[c[0]]===1;
-    return '<div class="md-it'+(ok?' ok':'')+'" title="'+c[1]+'"><div class="md-c">'+(ok?'🏅':'🔒')+'</div><div class="md-m">'+m+'</div></div>';}).join('');
-  return '<div class="md-card anim a2">'
-    +(curOK?'<div class="md-top">🏅 <b>¡Asistencia perfecta este corte!</b><span>0 faltas · '+((CORTES.find(function(x){return x.selected;})||{}).label||'')+'</span></div>':'')
-    +'<div class="md-h"><div><b>🏆 Mis medallas de asistencia</b><div class="md-s">Una medalla por cada corte con 0 faltas</div></div><div class="md-n">'+won+'<small>/'+cs.length+'</small></div></div>'
-    +'<div class="md-g">'+items+'</div>'
-    +(racha>1?'<div class="md-r">🔥 Llevas <b>'+racha+' cortes seguidos</b> con asistencia perfecta. ¡No cortes la racha!</div>':(curOK?'':'<div class="md-r" style="background:#f1f5f9;color:#475569">Cuida tu asistencia y gana tu medalla el próximo corte 💪</div>'))
-    +'</div>';
+  var dots=cs.map(function(c){var m=_MES[Number(c[0].slice(16,18))-1];return '<span class="md-d'+(p[c[0]]===1?' ok':'')+'" title="'+m+'">'+m.charAt(0)+'</span>';}).join('');
+  return '<div class="md-card">'
+    +'<div class="md-l">'+(curOK?'🏅 <b>Asistencia perfecta</b>':'<span style="opacity:.7">Sin medalla este corte</span>')+(racha>1?' <span class="md-r">🔥 '+racha+' seguidos</span>':'')+'</div>'
+    +'<div class="md-ds">'+dots+'</div></div>';
 }
 
 /* ===== Admin: conformidad y reportes ===== */
